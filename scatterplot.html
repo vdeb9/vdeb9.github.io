@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+
+<script src="https://d3js.org/d3.v4.js"></script>
+<script src="https://unpkg.com/tone"></script><!--https://cdn.jsdelivr.net/npm/tone-->
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+
+
+
+
+<div class="w3-container w3-border w3-large">
+<p><span style="font-weight: bold">Every Interval at Once</span>
+<button class="w3-bar-item w3-button" onclick="openPage('Home', this)"> Info </button>
+<!--<button class="w3-bar-item w3-button" onclick="openPage('Songs', this)">  Songs </button>-->
+<button class="w3-bar-item w3-button" onclick="openPage('News', this)" id="defaultOpen"> Map </button>
+<button class="w3-bar-item w3-button" onclick="openPage('Data', this)"> Data </button>
+<button class="w3-bar-item w3-button" onclick="openPage('Acknowledgements', this)"> Acknowledgements </button></p>
+
+
+
+</div>
+<style>body {
+
+
+background-color: white;
+}</style>
+
+<div id="Home" class="tabcontent">
+  <!--<h3 style="margin-left: 25px;">Every Interval at Once</h3>-->
+  <p style="margin-left: 25px;">Every Interval at Once is a project centered around applying music theoretical principles to quantify harmonic and melodic features in music. </p>
+  <p style="margin-left: 25px;">Paper is a work in progress, but will be linked here!</p>
+    <figure>
+      <img src="MusicHistorySum.gif" alt="Music_History" width="30%">
+       <figcaption>Fig.4 Music map from 1960-2023</figcaption>
+      <p style="margin-left: 25px;"></p>
+    </figure>
+  
+</div>
+
+
+<div id="Acknowledgements" class="tabcontent">
+  <h3 style="margin-left: 25px;">Acknowledgements</h3>
+  <p style="margin-left: 25px;">Thank you to Dr. Edward Sazonov for providing me with the computational resources at the University of Alabama to complete this research project,<br>
+    Dr. Cecil Flournoy, for advising me throughout the research process, and<br>
+    Ms. Hugsin Chin, for directing the Alabama School of Fine Arts Math & Science Department.<br>
+    Also, visit <a href="http://everynoise.com/">Every Noise at Once</a>, which inspired this project!</p>
+  
+</div>
+
+<div id="News" class="tabcontent">
+  
+  <p><button class="w3-bar-item w3-button" onclick="enableLoop()"> Turn on sound </button>
+   <!--Speed <input type="range" name="mySlider" id=mySlider min="65" max="500" value="180">--></p>
+  
+  <script>
+  
+  var markovMat=[[1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12],
+  [1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12],
+  [1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12],
+  [1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12],
+  [1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12],
+  [1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12],
+  [1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12],
+  [1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12],
+  [1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12],
+  [1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12],
+  [1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12],
+  [1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12],
+  ]
+  var notes = ["C3","Db3","D3","Eb3","E3","F3","Gb3","G3","Ab3","A3","Bb3","B3"]
+  var notestate=0;
+  var stuckcounter=0;
+  const reverb = new Tone.Reverb().toDestination();
+  //const synth = new Tone.FMSynth().connect(reverb);
+
+  const sampler = new Tone.Sampler({
+	urls: {
+		A1: "A1.mp3",
+		A2: "A2.mp3",
+	},
+	baseUrl: "https://tonejs.github.io/audio/salamander/",
+  }).toDestination();
+
+  var rate=180
+  const backgroundSynth = new Tone.FMSynth().connect(reverb);;
+  var loop_on = 0;
+  function enableLoop() {
+    if(loop_on==0) {
+      loop_on=1
+      notestate=0
+      Tone.start();
+      Tone.Transport.start();
+      playNote()
+      
+    } else {
+      Tone.Transport.stop();
+      loop_on=0;
+    }
+    
+  }
+  function changeMarkov(d) {
+    var denominator = [0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]
+    for(let i = 0; i < 144; i++) {
+      denominator[parseInt((i-(i%12))/12)]+=parseFloat(d[i])
+    }
+    for(let i = 0; i < 144; i++) {
+      if(denominator[parseInt((i-(i%12))/12)]!=0) {
+        
+        markovMat[i%12][parseInt((i-(i%12))/12)]=parseFloat(d[i])/denominator[parseInt((i-(i%12))/12)]
+        
+      } else {
+        markovMat[i%12][parseInt((i-(i%12))/12)]=0
+      }
+      
+    }
+  }
+  function playNote() {
+    sampler.triggerAttackRelease("C2", 0.3333);
+    sampler.triggerAttackRelease(notes[notestate], 0.3333);
+
+
+
+    var rand = Math.random()
+    var count = 0
+    for(let i = 0; i < 12; i++) {
+      count+=parseFloat(markovMat[i][notestate])
+
+      if(count>rand) {
+        
+        if(notestate==i){
+          stuckcounter+=1;
+        }
+        
+        notestate=i
+        if(stuckcounter>2) {
+          
+          notestate=(i+7)%12
+          stuckcounter=0
+        }
+        i=12
+      }
+    }
+    setTimeout(function(){
+      if(loop_on==1) {
+        playNote()
+      }
+      
+    }, rate);   
+  }
+  </script>
+
+  <div id="my_dataviz"></div>
+</div>
+
+<div id="Data" class="tabcontent">
+  
+</div>
+
+
+
+<script>
+  var newsGraphRendered = false; 
+  /*
+  d3.select("#mySlider").on("change", function(d){
+
+    rate = this.value
+    //var svg = d3.select("#News");
+    //svg.selectAll("circle").remove()
+
+  })
+  */
+  function removeGraph() {
+    var svg = d3.select("#News");
+    svg.selectAll("*").html("");
+  }
+  function updateGraph() {
+    var margin = {top: 0, right: 0, bottom: 0, left: 0},
+        width = 900*2 - margin.left - margin.right,
+        height = 600*2 - margin.top - margin.bottom;
+    var svg = d3.select("#News");
+    
+  }
+
+  function rgbToHex(r, g, b) {
+  return "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1);
+  }
+  function openPage(pageName, elmnt, color) {
+    var i, tabcontent, tablinks;
+
+
+    tabcontent = document.getElementsByClassName('tabcontent');
+    for (i = 0; i < tabcontent.length; i++) {
+      tabcontent[i].style.display = 'none'
+    }
+
+    tablinks = document.getElementsByClassName('tablink');
+    for (i = 0; i < tablinks.length; i++) {
+      tablinks[i].style.backgroundColor = '';
+    }
+    
+    document.getElementById(pageName).style.display = 'block';
+    elmnt.style.backgroundColor = color;
+    
+    if (pageName === 'News' && !newsGraphRendered) {
+      renderGraph(2023);
+      newsGraphRendered = true;
+    } 
+    if (pageName === 'Data') {
+      window.location.href = "https://figshare.com/articles/dataset/EveryIntervalMIDIDATA/25322941";
+    } 
+
+  }
+  
+
+  
+  function renderGraph(selectedYear) {
+    var margin = {top: 0, right: 0, bottom: 0, left: 0},
+        width = 900*2 - margin.left - margin.right,
+        height = 600*2 - margin.top - margin.bottom;
+
+    var svg = d3.select("#News")
+            
+          .append("g")
+      .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .call(d3.zoom().on("zoom", function () {
+              svg.attr("transform", d3.event.transform)
+            }))
+      .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        
+    //svg.append("rect")
+      //.attr("x", 0)
+      //.attr("y", 0)
+      //.attr("height", height)
+      //.attr("width", width)
+      //.style("fill", "EBEBEB");
+
+    svg.append("rect")
+      .attr("width", "100%")
+      .attr("height", "100%")
+      .attr("fill", "white");
+
+    // read data
+    d3.csv("https://raw.githubusercontent.com/buildercatninja/EveryIntervalcsv/main/EIAO_UMAP.csv", function(data) {
+      
+      
+      var x = d3.scaleLinear()
+        .domain([-2.5, 12.5])
+        .range([0, width]);
+      svg.append("g")
+      //  .attr("transform", "translate(0," + height + ")")
+      //  .call(d3.axisBottom(x));
+
+      
+      var y = d3.scaleLinear()
+        .domain([0, 10])
+        .range([height, 0]);
+      svg.append("g")
+      //  .call(d3.axisLeft(y));
+
+      
+      var tooltip = d3.select("#my_dataviz")
+        .append("div")
+        .style("bottom",5)
+        .style("left",5)
+        .style("opacity", 0)
+        .attr("class", "tooltip")
+        .style("background-color", "white")
+        .style("border", "solid")
+        .style("border-width", "1px")
+        .style("border-radius", "5px")
+        .style("padding", "10px")
+        .style("position","fixed")
+        .style("bottom","10px")
+        
+
+      // tooltip
+      var mouseover = function(d) {
+        tooltip.style("opacity", 1);
+        changeMarkov(d);
+        
+        //const synth = new Tone.Synth().toDestination();
+        //synth.triggerAttackRelease("C4", "8n");
+      };
+
+      var mousemove = function(d) {
+        tooltip
+          
+          .html(d.Title + " - " + d.Artist + ", " + d.Genre + " (" + d.x + "," + d.y + ")")     
+      };
+
+      var touchstart = function(d) {
+        tooltip
+          
+          .html(d.Title + " - " + d.Artist + ", " + d.Genre + " (" + d.x + "," + d.y + ")")     
+      };
+      
+      
+
+      var mouseleave = function(d) {
+        //tooltip.transition().duration(2000).style("opacity", 0);
+      };
+
+
+      
+
+      
+      scatterplot = svg
+        .append('g')
+        .selectAll("dot")
+        .data(data)
+        .enter()
+        .append("circle")
+          .attr("cx", function(d) { 
+            if(d.Year<=selectedYear) {
+              return x(d.x);
+            } else {return x(0)}
+            })
+          .attr("cy", function(d) { 
+            if(d.Year<=selectedYear) {
+              return y(d.y);
+            } else { return y(0)} })
+          .attr("r", 1.6)
+          .style("fill", function(d) { 
+            if(d.Year<=selectedYear) {
+              return rgbToHex(d.r*255,d.g*255,d.b*255); 
+            } else {return rgbToHex(255,255,255)}
+          })
+          .style("opacity", 1)
+        .on("mouseover", mouseover)
+        .on("mousemove", function(event, d) { mousemove(event, d); })
+        .on("mouseleave", mouseleave);
+
+      
+    });
+    
+
+  }
+  document.getElementById("defaultOpen").click();
+</script>
+
+
+
+
+
+
+</html>
