@@ -31,8 +31,8 @@ background-color: white;
   <p style="margin-left: 25px;">Every Interval at Once is a project centered around applying music theoretical principles to quantify harmonic and melodic features in music. </p>
   <p style="margin-left: 25px;">Paper is a work in progress, but will be linked here!</p>
     <figure>
-      <img src="MusicHistorySumLoop.gif" alt="Music_History" width="30%">
-       <figcaption>Music map from 1960-2023</figcaption>
+      <img src="MusicHistorySum.gif" alt="Music_History" width="30%">
+       <figcaption>Fig.4 Music map from 1960-2023</figcaption>
       <p style="margin-left: 25px;"></p>
     </figure>
   
@@ -69,21 +69,60 @@ background-color: white;
   [1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12,1/12],
   ]
   var notes = ["C3","Db3","D3","Eb3","E3","F3","Gb3","G3","Ab3","A3","Bb3","B3"]
+  var notesExtra = ["C4","Db4","D4","Eb4","E4","F4","Gb4","G4","Ab4","A4","Bb4","B4"]
+  
   var notestate=0;
   var stuckcounter=0;
-  const reverb = new Tone.Reverb().toDestination();
-  //const synth = new Tone.FMSynth().connect(reverb);
+  var harmonyArray = [0,0,0,0,0,0,0,0,0,0,0,0];
 
-  const sampler = new Tone.Sampler({
+
+  const phaser = new Tone.Phaser().toDestination();
+  const reverb = new Tone.Reverb().toDestination();
+  const Csynth = new Tone.FMSynth().connect(reverb).connect(phaser)
+  const Dbsynth = new Tone.FMSynth().connect(reverb).connect(phaser)
+  const Dsynth = new Tone.FMSynth().connect(reverb).connect(phaser)
+  const Ebsynth = new Tone.FMSynth().connect(reverb).connect(phaser)
+  const Esynth = new Tone.FMSynth().connect(reverb).connect(phaser)
+  const Fsynth = new Tone.FMSynth().connect(reverb).connect(phaser)
+  const Gbsynth = new Tone.FMSynth().connect(reverb).connect(phaser)
+  const Gsynth = new Tone.FMSynth().connect(reverb).connect(phaser)
+  const Absynth = new Tone.FMSynth().connect(reverb).connect(phaser)
+  const Asynth = new Tone.FMSynth().connect(reverb).connect(phaser)
+  const Bbsynth = new Tone.FMSynth().connect(reverb).connect(phaser)
+  const Bsynth = new Tone.FMSynth().connect(reverb).connect(phaser)
+  Csynth.volume.value = -40;
+  Dbsynth.volume.value = -40;
+  Dsynth.volume.value = -40;
+  Ebsynth.volume.value = -40;
+  Esynth.volume.value = -40;
+  Fsynth.volume.value = -40;
+  Gbsynth.volume.value = -40;
+  Gsynth.volume.value = -40;
+  Absynth.volume.value = -40;
+  Asynth.volume.value = -40;
+  Bbsynth.volume.value = -40;
+  Bsynth.volume.value = -40;
+  
+
+  /*const sampler = new Tone.Sampler({
 	urls: {
 		A1: "A1.mp3",
 		A2: "A2.mp3",
 	},
 	baseUrl: "https://tonejs.github.io/audio/salamander/",
   }).toDestination();
+  sampler.volume.value=-15;*/
+  const bass = new Tone.MembraneSynth().connect(reverb)
+  const snare = new Tone.NoiseSynth().connect(reverb)
 
-  var rate=180
-  const backgroundSynth = new Tone.FMSynth().connect(reverb);;
+  var rate=240 //180
+  const effectPrime = new Tone.FeedbackDelay(0.375,0.75).toDestination();
+  
+  const primeSynth = new Tone.Synth().connect(effectPrime);
+  primeSynth.volume.value = -50;
+  bass.volume.value = -50;
+  snare.volume.value = -50;
+  t=0
   var loop_on = 0;
   function enableLoop() {
     if(loop_on==0) {
@@ -101,6 +140,7 @@ background-color: white;
   }
   function changeMarkov(d) {
     var denominator = [0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]
+    
     for(let i = 0; i < 144; i++) {
       denominator[parseInt((i-(i%12))/12)]+=parseFloat(d[i])
     }
@@ -114,11 +154,48 @@ background-color: white;
       }
       
     }
+    //console.log(-40*((denominator[0]-1)**14));//-40*((x-1)**14)
+    Csynth.volume.value = -55*((denominator[0]-1)**14)-2;
+    Dbsynth.volume.value = -55*((denominator[1]-1)**14)-2;
+    Dsynth.volume.value = -55*((denominator[2]-1)**14)-2;
+    Ebsynth.volume.value = -55*((denominator[3]-1)**14)-2;
+    Esynth.volume.value = -55*((denominator[4]-1)**14)-2;
+    Fsynth.volume.value = -55*((denominator[5]-1)**14)-2;
+    Gbsynth.volume.value = -55*((denominator[6]-1)**14)-2;
+    Gsynth.volume.value = -55*((denominator[7]-1)**14)-2;
+    Absynth.volume.value = -55*((denominator[8]-1)**14)-2;
+    Asynth.volume.value = -55*((denominator[9]-1)**14)-2;
+    Bbsynth.volume.value = -55*((denominator[10]-1)**14)-2;
+    Bsynth.volume.value = -55*((denominator[11]-1)**14)-2;
+    primeSynth.volume.value = 2;
+    bass.volume.value = 2;
+    snare.volume.value = 2;
   }
   function playNote() {
-    sampler.triggerAttackRelease("C2", 0.3333);
-    sampler.triggerAttackRelease(notes[notestate], 0.3333);
-
+    notetime=0.5
+    //primeSynth.triggerAttackRelease("C2", notetime);
+    primeSynth.triggerAttackRelease(notesExtra[notestate], notetime);
+    
+    Csynth.triggerAttackRelease("C3",notetime);
+    Dbsynth.triggerAttackRelease("Db3",notetime);
+    Dsynth.triggerAttackRelease("D3",notetime);
+    Ebsynth.triggerAttackRelease("Eb3",notetime);
+    Esynth.triggerAttackRelease("E3",notetime);
+    Fsynth.triggerAttackRelease("F3",notetime);
+    Gbsynth.triggerAttackRelease("Gb3",notetime);
+    Gsynth.triggerAttackRelease("G3",notetime);
+    Absynth.triggerAttackRelease("Ab3",notetime);
+    Asynth.triggerAttackRelease("A3",notetime);
+    Bbsynth.triggerAttackRelease("Bb3",notetime);
+    Bsynth.triggerAttackRelease("B3",notetime);
+    /*if(t==8) {
+      t=0;
+    }
+    if(t==0) bass.triggerAttackRelease("C2",notetime);
+    if(t==4) snare.triggerAttackRelease(notetime);
+    t++;*/
+    
+    
 
 
     var rand = Math.random()
