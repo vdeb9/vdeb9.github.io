@@ -15,7 +15,7 @@
 <!--<button class="w3-bar-item w3-button" onclick="openPage('Songs', this)">  Songs </button>-->
 <button class="w3-bar-item w3-button" onclick="openPage('News', this)" id="defaultOpen"> Map </button>
 <button class="w3-bar-item w3-button" onclick="openPage('Data', this)"> Data </button>
-<button class="w3-bar-item w3-button" onclick="openPage('Acknowledgements', this)"> Acknowledgements </button></p>
+<button class="w3-bar-item w3-button" onclick="openPage('Ack', this)"> Load Page Without Sound</button></p>
 
 
 
@@ -28,23 +28,17 @@ background-color: white;
 
 <div id="Home" class="tabcontent">
   <!--<h3 style="margin-left: 25px;">Every Interval at Once</h3>-->
-  <p style="margin-left: 25px;">Every Interval at Once is a project centered around applying music theoretical principles to quantify harmonic and melodic features in music. </p>
-  <p style="margin-left: 25px;">Paper is a work in progress, but will be linked here!</p>
-    <figure>
+  <p style="margin-left: 25px;">Every Interval at Once is a project centered around applying music theoretical principles to quantify harmonic and melodic features in music. This website demonstrates its application to music mapping, inspired by <a href="https://everynoise.com/">Every Noise at Once</a>. </p>
+  <p style="margin-left: 25px;">Technical paper will be linked here once published!</p>
+    <!--<figure>
       <img src="MusicHistorySumLoop.gif" alt="Music_History" width="30%">
-       <figcaption>Fig.4 Music map from 1960-2023</figcaption>
       <p style="margin-left: 25px;"></p>
-    </figure>
+    </figure>-->
   
 </div>
 
 
-<div id="Acknowledgements" class="tabcontent">
-  <h3 style="margin-left: 25px;">Acknowledgements</h3>
-  <p style="margin-left: 25px;">Thank you to Dr. Edward Sazonov for providing me with the computational resources at the University of Alabama to complete this research project,<br>
-    Dr. Cecil Flournoy, for advising me throughout the research process, and<br>
-    Ms. Hugsin Chin, for directing the Alabama School of Fine Arts Math & Science Department.<br>
-    Also, visit <a href="http://everynoise.com/">Every Noise at Once</a>, which inspired this project!</p>
+<div id="Ack" class="tabcontent">
   
 </div>
 
@@ -283,6 +277,10 @@ background-color: white;
     } 
     if (pageName === 'Data') {
       window.location.href = "https://figshare.com/articles/dataset/EveryIntervalMIDIDATA/25322941";
+    } 
+    console.log(pageName);
+    if (pageName === 'Ack') {
+      window.location.href = "nosound.html";
     } 
 
   }
