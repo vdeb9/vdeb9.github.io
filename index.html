@@ -106,16 +106,16 @@ background-color: white;
 	baseUrl: "https://tonejs.github.io/audio/salamander/",
   }).toDestination();
   sampler.volume.value=-15;*/
-  const bass = new Tone.MembraneSynth().connect(reverb)
-  const snare = new Tone.NoiseSynth().connect(reverb)
+  //const bass = new Tone.MembraneSynth().connect(reverb)
+  //const snare = new Tone.NoiseSynth().connect(reverb)
 
   var rate=240 //180
   const effectPrime = new Tone.FeedbackDelay(0.375,0.75).toDestination();
   
   const primeSynth = new Tone.Synth().connect(effectPrime);
   primeSynth.volume.value = -50;
-  bass.volume.value = -50;
-  snare.volume.value = -50;
+  //bass.volume.value = -50;
+  //snare.volume.value = -50;
   t=0
   var loop_on = 0;
   function enableLoop() {
@@ -149,19 +149,19 @@ background-color: white;
       
     }
     //console.log(-40*((denominator[0]-1)**14));//-40*((x-1)**14)
-    Csynth.volume.value = -55*((denominator[0]-1)**14)-12;
-    Dbsynth.volume.value = -55*((denominator[1]-1)**14)-12;
-    Dsynth.volume.value = -55*((denominator[2]-1)**14)-12;
-    Ebsynth.volume.value = -55*((denominator[3]-1)**14)-12;
-    Esynth.volume.value = -55*((denominator[4]-1)**14)-12;
-    Fsynth.volume.value = -55*((denominator[5]-1)**14)-12;
-    Gbsynth.volume.value = -55*((denominator[6]-1)**14)-12;
-    Gsynth.volume.value = -55*((denominator[7]-1)**14)-12;
-    Absynth.volume.value = -55*((denominator[8]-1)**14)-12;
-    Asynth.volume.value = -55*((denominator[9]-1)**14)-12;
-    Bbsynth.volume.value = -55*((denominator[10]-1)**14)-12;
-    Bsynth.volume.value = -55*((denominator[11]-1)**14)-12;
-    primeSynth.volume.value = -10;
+    Csynth.volume.value = -55*((denominator[0]-1)**14)-17;
+    Dbsynth.volume.value = -55*((denominator[1]-1)**14)-17;
+    Dsynth.volume.value = -55*((denominator[2]-1)**14)-17;
+    Ebsynth.volume.value = -55*((denominator[3]-1)**14)-17;
+    Esynth.volume.value = -55*((denominator[4]-1)**14)-17;
+    Fsynth.volume.value = -55*((denominator[5]-1)**14)-17;
+    Gbsynth.volume.value = -55*((denominator[6]-1)**14)-17;
+    Gsynth.volume.value = -55*((denominator[7]-1)**14)-17;
+    Absynth.volume.value = -55*((denominator[8]-1)**14)-17;
+    Asynth.volume.value = -55*((denominator[9]-1)**14)-17;
+    Bbsynth.volume.value = -55*((denominator[10]-1)**14)-17;
+    Bsynth.volume.value = -55*((denominator[11]-1)**14)-17;
+    primeSynth.volume.value = -15;
   }
   function playNote() {
     notetime=0.5
