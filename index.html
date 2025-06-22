@@ -64,6 +64,7 @@ background-color: white;
   ]
   var notes = ["C3","Db3","D3","Eb3","E3","F3","Gb3","G3","Ab3","A3","Bb3","B3"]
   var notesExtra = ["C4","Db4","D4","Eb4","E4","F4","Gb4","G4","Ab4","A4","Bb4","B4"]
+  var notesExtraExtra = ["C5","Db5","D5","Eb5","E5","F5","Gb5","G5","Ab5","A5","Bb5","B5"]
   
   var notestate=0;
   var stuckcounter=0;
@@ -72,48 +73,52 @@ background-color: white;
 
   const phaser = new Tone.Phaser().toDestination();
   const reverb = new Tone.Reverb().toDestination();
-  const Csynth = new Tone.FMSynth().connect(reverb).connect(phaser)
-  const Dbsynth = new Tone.FMSynth().connect(reverb).connect(phaser)
-  const Dsynth = new Tone.FMSynth().connect(reverb).connect(phaser)
-  const Ebsynth = new Tone.FMSynth().connect(reverb).connect(phaser)
-  const Esynth = new Tone.FMSynth().connect(reverb).connect(phaser)
-  const Fsynth = new Tone.FMSynth().connect(reverb).connect(phaser)
-  const Gbsynth = new Tone.FMSynth().connect(reverb).connect(phaser)
-  const Gsynth = new Tone.FMSynth().connect(reverb).connect(phaser)
-  const Absynth = new Tone.FMSynth().connect(reverb).connect(phaser)
-  const Asynth = new Tone.FMSynth().connect(reverb).connect(phaser)
-  const Bbsynth = new Tone.FMSynth().connect(reverb).connect(phaser)
-  const Bsynth = new Tone.FMSynth().connect(reverb).connect(phaser)
-  Csynth.volume.value = -40;
-  Dbsynth.volume.value = -40;
-  Dsynth.volume.value = -40;
-  Ebsynth.volume.value = -40;
-  Esynth.volume.value = -40;
-  Fsynth.volume.value = -40;
-  Gbsynth.volume.value = -40;
-  Gsynth.volume.value = -40;
-  Absynth.volume.value = -40;
-  Asynth.volume.value = -40;
-  Bbsynth.volume.value = -40;
-  Bsynth.volume.value = -40;
+
+  const harmonyBus = new Tone.Gain().toDestination();
+  const sharedReverb = new Tone.Reverb({ decay: 2, wet: 0.2 }).connect(harmonyBus);
+  const lowCut = new Tone.Filter(300, "highpass");
+
+  const sharedPhaster = new Tone.Phaser({ frequency: 0.5, octaves: 1, baseFrequency: 400 }).connect(lowCut).connect(sharedReverb);
+
+  const hm = 1
+  const mi = 5
+  const Csynth = new Tone.FMSynth({ modulationIndex: mi,harmonicity: hm }).connect(sharedPhaster)
+  const Dbsynth = new Tone.FMSynth({ modulationIndex: mi,harmonicity: hm }).connect(sharedPhaster)
+  const Dsynth = new Tone.FMSynth({ modulationIndex: mi,harmonicity: hm }).connect(sharedPhaster)
+  const Ebsynth = new Tone.FMSynth({ modulationIndex: mi,harmonicity: hm }).connect(sharedPhaster)
+  const Esynth = new Tone.FMSynth({ modulationIndex: mi,harmonicity: hm }).connect(sharedPhaster)
+  const Fsynth = new Tone.FMSynth({ modulationIndex: mi,harmonicity: hm}).connect(sharedPhaster)
+  const Gbsynth = new Tone.FMSynth({ modulationIndex: mi,harmonicity: hm }).connect(sharedPhaster)
+  const Gsynth = new Tone.FMSynth({ modulationIndex: mi,harmonicity: hm}).connect(sharedPhaster)
+  const Absynth = new Tone.FMSynth({ modulationIndex: mi,harmonicity:hm}).connect(sharedPhaster)
+  const Asynth = new Tone.FMSynth({ modulationIndex: mi,harmonicity: hm }).connect(sharedPhaster)
+  const Bbsynth = new Tone.FMSynth({ modulationIndex: mi,harmonicity: hm }).connect(sharedPhaster)
+  const Bsynth = new Tone.FMSynth({ modulationIndex: mi,harmonicity: hm }).connect(sharedPhaster)
+  Csynth.volume.value = -80;
+  Dbsynth.volume.value = -80;
+  Dsynth.volume.value = -80;
+  Ebsynth.volume.value = -80;
+  Esynth.volume.value = -80;
+  Fsynth.volume.value = -80;
+  Gbsynth.volume.value = -80;
+  Gsynth.volume.value = -80;
+  Absynth.volume.value = -80;
+  Asynth.volume.value = -80;
+  Bbsynth.volume.value = -80;
+  Bsynth.volume.value = -80;
   
 
-  /*const sampler = new Tone.Sampler({
-	urls: {
-		A1: "A1.mp3",
-		A2: "A2.mp3",
-	},
-	baseUrl: "https://tonejs.github.io/audio/salamander/",
-  }).toDestination();
-  sampler.volume.value=-15;*/
-  //const bass = new Tone.MembraneSynth().connect(reverb)
-  //const snare = new Tone.NoiseSynth().connect(reverb)
 
   var rate=240 //180
   const effectPrime = new Tone.FeedbackDelay(0.375,0.75).toDestination();
   
+
   const primeSynth = new Tone.Synth().connect(effectPrime);
+  const primeSynth2 = new Tone.Synth().connect(effectPrime);
   primeSynth.volume.value = -50;
+  primeSynth2.volume.value = -50;
+
+  
   //bass.volume.value = -50;
   //snare.volume.value = -50;
   t=0
@@ -148,25 +153,31 @@ background-color: white;
       }
       
     }
-    //console.log(-40*((denominator[0]-1)**14));//-40*((x-1)**14)
-    Csynth.volume.value = -55*((denominator[0]-1)**14)-17;
-    Dbsynth.volume.value = -55*((denominator[1]-1)**14)-17;
-    Dsynth.volume.value = -55*((denominator[2]-1)**14)-17;
-    Ebsynth.volume.value = -55*((denominator[3]-1)**14)-17;
-    Esynth.volume.value = -55*((denominator[4]-1)**14)-17;
-    Fsynth.volume.value = -55*((denominator[5]-1)**14)-17;
-    Gbsynth.volume.value = -55*((denominator[6]-1)**14)-17;
-    Gsynth.volume.value = -55*((denominator[7]-1)**14)-17;
-    Absynth.volume.value = -55*((denominator[8]-1)**14)-17;
-    Asynth.volume.value = -55*((denominator[9]-1)**14)-17;
-    Bbsynth.volume.value = -55*((denominator[10]-1)**14)-17;
-    Bsynth.volume.value = -55*((denominator[11]-1)**14)-17;
-    primeSynth.volume.value = -15;
+    //console.log(-Math.exp(-10*x+3.5)-17)
+    const now = Tone.now();
+    const thresh = 4.0;
+    Csynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[0]+thresh)-17, now + 0.2);
+    Dbsynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[1]+thresh)-17, now + 0.2);
+    Dsynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[2]+thresh)-17, now + 0.2);
+    Ebsynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[3]+thresh)-17, now + 0.2);
+    Esynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[4]+thresh)-17, now + 0.2);
+    Fsynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[5]+thresh)-17, now + 0.2);
+    Gbsynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[6]+thresh)-17, now + 0.2);
+    Gsynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[7]+thresh)-17, now + 0.2);
+    Absynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[8]+thresh)-17, now + 0.2);
+    Asynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[9]+thresh)-17, now + 0.2);
+    Bbsynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[10]+thresh)-17, now + 0.2);
+    Bsynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[11]+thresh)-17, now + 0.2);
+    
+    primeSynth.volume.value = -20;
+    primeSynth2.volume.value = -20;
   }
   function playNote() {
     notetime=0.5
     //primeSynth.triggerAttackRelease("C2", notetime);
     primeSynth.triggerAttackRelease(notesExtra[notestate], notetime);
+    primeSynth2.triggerAttackRelease(notesExtraExtra[notestate], notetime);
+    
     
     Csynth.triggerAttackRelease("C3",notetime);
     Dbsynth.triggerAttackRelease("Db3",notetime);
