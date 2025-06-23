@@ -156,21 +156,22 @@ background-color: white;
     //console.log(-Math.exp(-10*x+3.5)-17)
     const now = Tone.now();
     const thresh = 4.0;
-    Csynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[0]+thresh)-17, now + 0.2);
-    Dbsynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[1]+thresh)-17, now + 0.2);
-    Dsynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[2]+thresh)-17, now + 0.2);
-    Ebsynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[3]+thresh)-17, now + 0.2);
-    Esynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[4]+thresh)-17, now + 0.2);
-    Fsynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[5]+thresh)-17, now + 0.2);
-    Gbsynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[6]+thresh)-17, now + 0.2);
-    Gsynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[7]+thresh)-17, now + 0.2);
-    Absynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[8]+thresh)-17, now + 0.2);
-    Asynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[9]+thresh)-17, now + 0.2);
-    Bbsynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[10]+thresh)-17, now + 0.2);
-    Bsynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[11]+thresh)-17, now + 0.2);
+    const maxvol = -13;
+    Csynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[0]+thresh)+maxvol, now + 0.2);
+    Dbsynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[1]+thresh)+maxvol, now + 0.2);
+    Dsynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[2]+thresh)+maxvol, now + 0.2);
+    Ebsynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[3]+thresh)+maxvol, now + 0.2);
+    Esynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[4]+thresh)+maxvol, now + 0.2);
+    Fsynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[5]+thresh)+maxvol, now + 0.2);
+    Gbsynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[6]+thresh)+maxvol, now + 0.2);
+    Gsynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[7]+thresh)+maxvol, now + 0.2);
+    Absynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[8]+thresh)+maxvol, now + 0.2);
+    Asynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[9]+thresh)+maxvol, now + 0.2);
+    Bbsynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[10]+thresh)+maxvol, now + 0.2);
+    Bsynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[11]+thresh)+maxvol, now + 0.2);
     
-    primeSynth.volume.value = -20;
-    primeSynth2.volume.value = -20;
+    primeSynth.volume.value = -13;
+    primeSynth2.volume.value = -15;
   }
   function playNote() {
     notetime=0.5
