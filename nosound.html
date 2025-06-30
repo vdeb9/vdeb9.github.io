@@ -2,34 +2,34 @@
 <meta charset="utf-8">
 
 
-<script src="https://d3js.org/d3.v4.js"></script>
-
+<script src="https://d3js.org/d3.v7.js"></script>
+<script src="https://unpkg.com/tone"></script><!--https://cdn.jsdelivr.net/npm/tone-->
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 
 
 
 
 <div class="w3-container w3-border w3-large">
-<p><span style="font-weight: bold">Every Interval at Once</span>
-<button class="w3-bar-item w3-button" onclick="openPage('Home', this)"> Info </button>
+<p><span style="font-weight: bold; color:white">Aleatorica</span>
+<button style="color:white" class="w3-bar-item w3-button" onclick="openPage('Home', this)"> Info </button>
 <!--<button class="w3-bar-item w3-button" onclick="openPage('Songs', this)">  Songs </button>-->
-<button class="w3-bar-item w3-button" onclick="openPage('News', this)" id="defaultOpen"> Map </button>
-<button class="w3-bar-item w3-button" onclick="openPage('Data', this)"> Data </button>
-<button class="w3-bar-item w3-button" onclick="openPage('Ack', this)"> Load Page With Sound </button></p>
-
+<button style="color:white" class="w3-bar-item w3-button" onclick="openPage('News', this)" id="defaultOpen"> Map </button>
+<button style="color:white" class="w3-bar-item w3-button" onclick="openPage('Data', this)"> Data </button>
+<button style="color:white" class="w3-bar-item w3-button" onclick="openPage('Ack', this)"> Load Page With Sound</button></p>
+<p><span style="color:red">Work in Progress!!!!</span>
 
 
 </div>
 <style>body {
 
 
-background-color: white;
+background-color: black;
 }</style>
 
 <div id="Home" class="tabcontent">
   <!--<h3 style="margin-left: 25px;">Every Interval at Once</h3>-->
-  <p style="margin-left: 25px;width: 50%;">Every Interval at Once is a project centered around applying music theoretical principles to quantify harmonic and melodic features in music. This website demonstrates its application to music mapping, inspired by <a href="https://everynoise.com/">Every Noise at Once</a>.</p>
-  <p style="margin-left: 25px;width: 50%;">Technical paper will be linked here once published!</p>
+  <p style="margin-left: 25px;width: 50%;">Aleatorica is a project centered around applying music theoretical principles to quantify harmonic and melodic features in music. This website demonstrates its application to music mapping, inspired by <a href="https://everynoise.com/">Every Noise at Once</a>.</p>
+  <p style="margin-left: 25px;width: 50%;">Details to come soon!</p>
     <!--<figure>
       <img src="MusicHistorySumLoop.gif" alt="Music_History" width="30%">
       <p style="margin-left: 25px;"></p>
@@ -44,30 +44,26 @@ background-color: white;
 
 <div id="News" class="tabcontent">
   
-  
-  <script>
-  
+  <p>
+   <!--Speed <input type="range" name="mySlider" id=mySlider min="65" max="500" value="180">--></p>
 
 
+  <div id="my_dataviz">
 
-
-  
-
-  
-  
-  
-  </script>
-
-  <div id="my_dataviz"></div>
+      <!--<svg id="tooltip-svg" width="1" height="1" style="border:1px solid #ccc; margin-left: 20px;"></svg>
+  -->
+  </div>
 </div>
 
 <div id="Data" class="tabcontent">
-  
+
 </div>
 
 
 
 <script>
+  
+  var data_array = new Array();
   var newsGraphRendered = false; 
   /*
   d3.select("#mySlider").on("change", function(d){
@@ -123,6 +119,35 @@ background-color: white;
     } 
 
   }
+  function showTooltipPolygon(data, pathD) {
+    console.log('here')
+
+  }
+
+  function polyToPath(polygon) {
+
+    maxx=0
+    maxy=0
+    minx=1800
+    miny=1200
+    for (let vert of polygon) {
+      if (vert[0]<minx) {
+        minx=vert[0]
+      }
+      if (vert[1]<miny) {
+        miny=vert[1]
+      }
+      if (vert[0]>maxx) {
+        maxx=vert[0]
+      }
+      if (vert[1]>maxy) {
+        maxy=vert[1]
+      }
+    }
+    if (maxx-minx>15) {return null}
+    if (maxy-miny>15) {return null}
+    return polygon ? "M" + polygon.join("L") + "Z" : null;
+  }
   
 
   
@@ -138,10 +163,11 @@ background-color: white;
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
         .call(d3.zoom().on("zoom", function () {
-              svg.attr("transform", d3.event.transform)
+              svg.attr("transform", d3.zoomTransform(this))
             }))
       .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
 
         
     //svg.append("rect")
@@ -154,18 +180,17 @@ background-color: white;
     svg.append("rect")
       .attr("width", "100%")
       .attr("height", "100%")
-      .attr("fill", "white");
+      .attr("fill", "black");
 
     // read data
-    d3.csv("https://raw.githubusercontent.com/buildercatninja/EveryIntervalcsv/main/EIAOUMAP.csv", function(data) {
+    
+    d3.csv("https://raw.githubusercontent.com/buildercatninja/EveryIntervalcsv/main/EIAO_UMAP.csv", function(data) {
       
       
       var x = d3.scaleLinear()
         .domain([-2.5, 12.5])
         .range([0, width]);
-      svg.append("g")
-      //  .attr("transform", "translate(0," + height + ")")
-      //  .call(d3.axisBottom(x));
+      svg.append("g");
 
       
       var y = d3.scaleLinear()
@@ -175,79 +200,121 @@ background-color: white;
       //  .call(d3.axisLeft(y));
 
       
-      var tooltip = d3.select("#my_dataviz")
-        .append("div")
-        .style("bottom",5)
-        .style("left",5)
-        .style("opacity", 0)
-        .attr("class", "tooltip")
-        .style("background-color", "white")
-        .style("border", "solid")
-        .style("border-width", "1px")
-        .style("border-radius", "5px")
-        .style("padding", "10px")
-        .style("position","fixed")
-        .style("bottom","10px")
+
         
-
-      // tooltip
-      var mouseover = function(d) {
-        tooltip.style("opacity", 1);
-        
-        
-      };
-
-      var mousemove = function(d) {
-        tooltip
-          
-          .html(d.Title + " - " + d.Artist + ", " + d.Genre + " (" + d.x + "," + d.y + ")")     
-      };
-
-      var touchstart = function(d) {
-        tooltip
-          
-          .html(d.Title + " - " + d.Artist + ", " + d.Genre + " (" + d.x + "," + d.y + ")")     
-      };
       
-      
-
-      var mouseleave = function(d) {
-        //tooltip.transition().duration(2000).style("opacity", 0);
-      };
 
 
       
 
-      
-      scatterplot = svg
-        .append('g')
-        .selectAll("dot")
-        .data(data)
-        .enter()
-        .append("circle")
-          .attr("cx", function(d) { 
-            if(d.Year<=selectedYear) {
-              return x(d.x);
-            } else {return x(0)}
-            })
-          .attr("cy", function(d) { 
-            if(d.Year<=selectedYear) {
-              return y(d.y);
-            } else { return y(0)} })
-          .attr("r", 1.6)
-          .style("fill", function(d) { 
-            if(d.Year<=selectedYear) {
-              return rgbToHex(d.r*255,d.g*255,d.b*255); 
-            } else {return rgbToHex(255,255,255)}
-          })
-          .style("opacity", 1)
-        .on("mouseover", mouseover)
-        .on("mousemove", function(event, d) { mousemove(event, d); })
-        .on("mouseleave", mouseleave);
-
-      
+      data_array.unshift(data)
+      //console.log((data_array).length)
     });
+    console.log('pass')
+    var tooltip = d3.select("#my_dataviz")
+      .append("div")
+      .style("bottom",5)
+      .style("left",5)
+      .style("opacity", 0)
+      .attr("class", "tooltip")
+      .style("background-color", "white")
+      .style("border", "solid")
+      .style("border-width", "1px")
+      .style("border-radius", "5px")
+      .style("padding", "10px")
+      .style("position","fixed")
+      .style("bottom","10px")
+    var mouseover = function(de) {
+      //console.log(de.fromElement.__data__)
+      const d = de.toElement.__data__.data
+      tooltip.style("opacity", 1);
+      //changeMarkov(d);
+      
+      //const synth = new Tone.Synth().toDestination();
+      //synth.triggerAttackRelease("C4", "8n");
+    };
+
+    var mousemove = function(de) {
+      //console.log(de)
+      const d = de.toElement.__data__.data
+      //console.log(d)
+      tooltip
+        
+        .html(d.Title + " - " + d.Artist + ", " + d.Genre + " (" + d.x + "," + d.y + ")")     
+    };
+
+    var touchstart = function(de) {
+      
+      const d = de.toElement.__data__
+      tooltip
+        
+        .html(d.Title + " - " + d.Artist + ", " + d.Genre + " (" + d.x + "," + d.y + ")")     
+    };
     
+    
+
+    var mouseleave = function(d) {
+      //tooltip.transition().duration(2000).style("opacity", 0);
+    };
+
+
+    setTimeout(function(){
+      console.log(data_array.length)
+      const visiblePoints = data_array
+        .map(d => [(d.x)*30+100, (d.y)*(-30)+500]);
+
+      // Build Delaunay and Voronoi
+      const delaunay = d3.Delaunay.from(visiblePoints);
+      const voronoi = delaunay.voronoi([0, 0, width, height]);
+  
+
+      var points = d3.range(23059).map(function(d) {return [d.x,d.y];});
+      var polygons = voronoi.cellPolygons(points);
+
+      var color_array = []
+      for(var i=0; i<data_array.length; i++) {
+        color_array.push([data_array[i].r,data_array[i].g,data_array[i].b])
+        
+      }
+      const iterator = color_array.entries()
+
+      console.log(polygons)
+
+      var color = function(d) {
+        const thing = iterator.next().value[1]
+        //console.log(thing)
+        return [d3.rgb(thing[0]*255,thing[1]*255,thing[2]*255)];}
+      
+
+
+      
+      
+      const polygonData = polygons.map((polygon, i) => ({
+        path: polyToPath(polygon),
+        data: data_array[i]
+      }));
+
+      const thing = svg.append("g")
+        .selectAll("path")
+        .data(polygonData)
+        .enter()
+        .append("path")
+          .attr("d", d => d.path)
+          .attr("fill", color)
+          .attr("pointer-events", "all")
+          .on("mouseover", mouseover)
+          .on("mousemove", (event, d) => mousemove(event, d.data))
+          .on("mouseleave", mouseleave)
+          .on("click",(event,d) => {
+            showTooltipPolygon(d.data,d.path);
+          });
+          
+            
+
+      console.log(data_array)
+      
+      
+    }, 3000);
 
   }
   document.getElementById("defaultOpen").click();
