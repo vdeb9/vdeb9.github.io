@@ -9,31 +9,46 @@
 
 
 
-<div class="w3-container w3-border w3-large">
+
+
 <p><span style="font-weight: bold; color:white">Aleatorica</span>
 <button style="color:white" class="w3-bar-item w3-button" onclick="openPage('Home', this)"> Info </button>
 <!--<button class="w3-bar-item w3-button" onclick="openPage('Songs', this)">  Songs </button>-->
 <button style="color:white" class="w3-bar-item w3-button" onclick="openPage('News', this)" id="defaultOpen"> Map </button>
 <button style="color:white" class="w3-bar-item w3-button" onclick="openPage('Data', this)"> Data </button>
 <button style="color:white" class="w3-bar-item w3-button" onclick="openPage('Ack', this)"> Load Page Without Sound</button></p>
+<!--
 <p><span style="color:red">Work in Progress!!!!</span>
-
+-->
 
 </div>
-<style>body {
+<style>body {background-color: black;}
+
+#News { position: relative; } 
 
 
-background-color: black;
-}</style>
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 2;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #fff;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
 
 <div id="Home" class="tabcontent">
-  <!--<h3 style="margin-left: 25px;">Every Interval at Once</h3>-->
   <p style="margin-left: 25px;width: 50%;">Aleatorica is a project centered around applying music theoretical principles to quantify harmonic and melodic features in music. This website demonstrates its application to music mapping, inspired by <a href="https://everynoise.com/">Every Noise at Once</a>.</p>
   <p style="margin-left: 25px;width: 50%;">Details to come soon!</p>
-    <!--<figure>
-      <img src="MusicHistorySumLoop.gif" alt="Music_History" width="30%">
-      <p style="margin-left: 25px;"></p>
-    </figure>-->
   
 </div>
 
@@ -43,7 +58,14 @@ background-color: black;
 </div>
 
 <div id="News" class="tabcontent">
-  
+  <div class="w3-container w3-border w3-large">
+    <div id="loading-overlay" class="loading-overlay w3-display-container" style="display:none">
+      <div class="w3-display-middle w3-center">
+        <div class="spinner"></div>
+        <div style="color:white; margin-top:12px;">Loading 23,059 songs…</div>
+      </div>
+    </div>
+  </div>
   <p><button class="w3-bar-item w3-button" style="color:white; position:fixed; background-color: transparent;" onclick="enableLoop()"> Turn on sound </button>
    <!--Speed <input type="range" name="mySlider" id=mySlider min="65" max="500" value="180">--></p>
   
@@ -75,7 +97,7 @@ background-color: black;
   const reverb = new Tone.Reverb().toDestination();
 
   const harmonyBus = new Tone.Gain().toDestination();
-  const sharedReverb = new Tone.Reverb({ decay: 2, wet: 0.2 }).connect(harmonyBus);
+  const sharedReverb = new Tone.Reverb({ decay: 4, wet: 0.8 }).connect(harmonyBus);
   const lowCut = new Tone.Filter(300, "highpass");
 
   const sharedPhaster = new Tone.Phaser({ frequency: 0.5, octaves: 1, baseFrequency: 400 }).connect(lowCut).connect(sharedReverb);
@@ -110,29 +132,64 @@ background-color: black;
 
 
   var rate=240 //180
-  const effectPrime = new Tone.FeedbackDelay(0.375,0.75).toDestination();
+  const effectPrime = new Tone.FeedbackDelay(0.375,0.6).toDestination();
   
 
-  const primeSynth = new Tone.Synth().connect(effectPrime);
-  const primeSynth2 = new Tone.Synth().connect(effectPrime);
+  const droneBus    = new Tone.Gain(0.7).connect(sharedReverb);                 
+  const droneDist   = new Tone.Distortion(0.00);
+  const drone = new Tone.FMSynth({ modulationIndex: mi,harmonicity: hm }).connect(sharedPhaster)
+
+  drone.volume.value = -22;
+  function startDrone(root = "C2"){ drone.triggerAttack(root); }
+  function stopDrone(){ drone.triggerRelease(); }
+
+
+
+  const primeSynth = new Tone.MonoSynth({
+    oscillator: { type: "square" },              
+    filter:     { type: "lowpass", Q: 8, rolloff: -12 },
+    envelope:   { attack: 0.001, decay: 0.08, sustain: 0.08, release: 0.08 },
+    filterEnvelope: {
+      attack: 0.001, decay: 0.05, sustain: 0.1, release: 0.05,
+      baseFrequency: 500, octaves: 3.1,
+    },
+    portamento: 0
+  }).connect(effectPrime);
+  const primeSynth2 = new Tone.MonoSynth({
+    oscillator: { type: "square" },               
+    filter:     { type: "lowpass", Q: 4, rolloff: -24 },
+    portamento: 0
+  }).connect(effectPrime);
   primeSynth.volume.value = -50;
   primeSynth2.volume.value = -50;
 
   
-  //bass.volume.value = -50;
-  //snare.volume.value = -50;
+
+
   t=0
   var loop_on = 0;
+
+  function showLoading() {
+    const el = document.getElementById('loading-overlay');
+    if (el) el.style.display = 'block';
+  }
+  function hideLoading() {
+    const el = document.getElementById('loading-overlay');
+    if (el) el.style.display = 'none';
+  }
+
   function enableLoop() {
     if(loop_on==0) {
       loop_on=1
       notestate=0
       Tone.start();
+      startDrone("C2");  
       Tone.Transport.start();
       playNote()
       
     } else {
       Tone.Transport.stop();
+      stopDrone();  
       loop_on=0;
     }
     
@@ -156,7 +213,7 @@ background-color: black;
     //console.log(-Math.exp(-10*x+3.5)-17)
     const now = Tone.now();
     const thresh = 4.0;
-    const maxvol = -13;
+    const maxvol = -16;
     Csynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[0]+thresh)+maxvol, now + 0.2);
     Dbsynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[1]+thresh)+maxvol, now + 0.2);
     Dsynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[2]+thresh)+maxvol, now + 0.2);
@@ -170,34 +227,28 @@ background-color: black;
     Bbsynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[10]+thresh)+maxvol, now + 0.2);
     Bsynth.volume.linearRampToValueAtTime(-Math.exp(-10*denominator[11]+thresh)+maxvol, now + 0.2);
     
-    primeSynth.volume.value = -15;
-    primeSynth2.volume.value = -16;
+    primeSynth.volume.value = -30;
+    primeSynth2.volume.value = -27;
   }
   function playNote() {
     notetime=0.5
     //primeSynth.triggerAttackRelease("C2", notetime);
-    primeSynth.triggerAttackRelease(notesExtra[notestate], notetime);
+    primeSynth.triggerAttackRelease(notes[notestate], notetime);
     primeSynth2.triggerAttackRelease(notesExtraExtra[notestate], notetime);
     
     
-    Csynth.triggerAttackRelease("C3",notetime);
-    Dbsynth.triggerAttackRelease("Db3",notetime);
-    Dsynth.triggerAttackRelease("D3",notetime);
-    Ebsynth.triggerAttackRelease("Eb3",notetime);
-    Esynth.triggerAttackRelease("E3",notetime);
-    Fsynth.triggerAttackRelease("F3",notetime);
-    Gbsynth.triggerAttackRelease("Gb3",notetime);
-    Gsynth.triggerAttackRelease("G3",notetime);
-    Absynth.triggerAttackRelease("Ab3",notetime);
-    Asynth.triggerAttackRelease("A3",notetime);
-    Bbsynth.triggerAttackRelease("Bb3",notetime);
-    Bsynth.triggerAttackRelease("B3",notetime);
-    /*if(t==8) {
-      t=0;
-    }
-    if(t==0) bass.triggerAttackRelease("C2",notetime);
-    if(t==4) snare.triggerAttackRelease(notetime);
-    t++;*/
+    Csynth.triggerAttackRelease("C4",notetime);
+    Dbsynth.triggerAttackRelease("Db4",notetime);
+    Dsynth.triggerAttackRelease("D4",notetime);
+    Ebsynth.triggerAttackRelease("Eb4",notetime);
+    Esynth.triggerAttackRelease("E4",notetime);
+    Fsynth.triggerAttackRelease("F4",notetime);
+    Gbsynth.triggerAttackRelease("Gb4",notetime);
+    Gsynth.triggerAttackRelease("G4",notetime);
+    Absynth.triggerAttackRelease("Ab4",notetime);
+    Asynth.triggerAttackRelease("A4",notetime);
+    Bbsynth.triggerAttackRelease("Bb4",notetime);
+    Bsynth.triggerAttackRelease("B4",notetime);
     
     
 
@@ -290,14 +341,17 @@ background-color: black;
     elmnt.style.backgroundColor = color;
     
     if (pageName === 'News' && !newsGraphRendered) {
+      showLoading(); 
       renderGraph(2023);
       newsGraphRendered = true;
     } 
     if (pageName === 'Data') {
+      hideLoading();
       window.location.href = "https://figshare.com/articles/dataset/EveryIntervalMIDIDATA/25322941";
     } 
     console.log(pageName);
     if (pageName === 'Ack') {
+      hideLoading();
       window.location.href = "nosound.html";
     } 
 
@@ -333,173 +387,111 @@ background-color: black;
   }
   
 
-  
   function renderGraph(selectedYear) {
     var margin = {top: 0, right: 0, bottom: 0, left: 0},
-        width = 900*2 - margin.left - margin.right,
-        height = 600*2 - margin.top - margin.bottom;
+        width  = 900*2 - margin.left - margin.right,
+        height = 600*2 - margin.top  - margin.bottom;
 
-    var svg = d3.select("#News")
-            
-          .append("g")
-      .append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-        .call(d3.zoom().on("zoom", function () {
-              svg.attr("transform", d3.zoomTransform(this))
-            }))
+    var outerSvg = d3.select("#News")
       .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+      .append("svg")
+        .attr("width",  width  + margin.left + margin.right)
+        .attr("height", height + margin.top  + margin.bottom);
 
+    var g = outerSvg.append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
 
-        
-    //svg.append("rect")
-      //.attr("x", 0)
-      //.attr("y", 0)
-      //.attr("height", height)
-      //.attr("width", width)
-      //.style("fill", "EBEBEB");
+    outerSvg.call(d3.zoom().on("zoom", function (event) {
+      g.attr("transform", event.transform);
+    }));
 
-    svg.append("rect")
-      .attr("width", "100%")
-      .attr("height", "100%")
-      .attr("fill", "black");
+    g.append("rect").attr("width","100%").attr("height","100%").attr("fill","black");
 
-    // read data
-    
-    d3.csv("https://raw.githubusercontent.com/buildercatninja/EveryIntervalcsv/main/EIAO_UMAP.csv", function(data) {
-      
-      
-      var x = d3.scaleLinear()
-        .domain([-2.5, 12.5])
-        .range([0, width]);
-      svg.append("g");
+    var tooltip = d3.select("#my_dataviz").append("div")
+      .style("opacity", 0).attr("class","tooltip")
+      .style("background-color","white").style("border","solid 1px")
+      .style("border-radius","5px").style("padding","10px")
+      .style("position","fixed").style("bottom","10px").style("left","10px");
 
-      
-      var y = d3.scaleLinear()
-        .domain([0, 10])
-        .range([height, 0]);
-      svg.append("g")
-      //  .call(d3.axisLeft(y));
+    function onMouseOver(ev, d){ tooltip.style("opacity",1); changeMarkov(d.data); }
+    function onMouseMove(ev, d){
+      const r = d.data;
+      tooltip.html(`${r.Title} - ${r.Artist}, ${r.Genre} (${r.x}, ${r.y})`);
+    }
+    function onMouseLeave(ev, d){ }
 
-      
+    d3.csv("https://raw.githubusercontent.com/buildercatninja/EveryIntervalcsv/main/EIAO_UMAP.csv")
+      .then(function(data){
+        const x = d3.scaleLinear().domain([-3.5, 13.5]).range([0, width]);
+        const y = d3.scaleLinear().domain([-1, 11]).range([height, 0]);
 
-        
-      
+        const pts = data.map(d => [ x(+d.x), y(+d.y) ]);
+        const delaunay = d3.Delaunay.from(pts);
+        const voronoi  = delaunay.voronoi([0, 0, width, height]);
 
+        const MAX_CELL_AREA = 1000;  
+        const MAX_SPAN      = 80;    
 
-      
+        function polygonArea(poly){
+          let a = 0;
+          for (let i=0, j=poly.length-1; i<poly.length; j=i++) {
+            a += (poly[j][0]*poly[i][1] - poly[i][0]*poly[j][1]);
+          }
+          return Math.abs(a) * 0.5;
+        }
+        function polygonSpanOK(poly){
+          let minx=Infinity, miny=Infinity, maxx=-Infinity, maxy=-Infinity;
+          for (const [px,py] of poly){
+            if (px<minx) minx=px; if (py<miny) miny=py;
+            if (px>maxx) maxx=px; if (py>maxy) maxy=py;
+          }
+          return (maxx-minx) <= MAX_SPAN && (maxy-miny) <= MAX_SPAN;
+        }
 
-      data_array.unshift(data)
-      //console.log((data_array).length)
-    });
-    console.log('pass')
-    var tooltip = d3.select("#my_dataviz")
-      .append("div")
-      .style("bottom",5)
-      .style("left",5)
-      .style("opacity", 0)
-      .attr("class", "tooltip")
-      .style("background-color", "white")
-      .style("border", "solid")
-      .style("border-width", "1px")
-      .style("border-radius", "5px")
-      .style("padding", "10px")
-      .style("position","fixed")
-      .style("bottom","10px")
-    var mouseover = function(de) {
-      //console.log(de.fromElement.__data__)
-      const d = de.toElement.__data__.data
-      tooltip.style("opacity", 1);
-      changeMarkov(d);
-      
-      //const synth = new Tone.Synth().toDestination();
-      //synth.triggerAttackRelease("C4", "8n");
-    };
-
-    var mousemove = function(de) {
-      //console.log(de)
-      const d = de.toElement.__data__.data
-      //console.log(d)
-      tooltip
-        
-        .html(d.Title + " - " + d.Artist + ", " + d.Genre + " (" + d.x + "," + d.y + ")")     
-    };
-
-    var touchstart = function(de) {
-      
-      const d = de.toElement.__data__
-      tooltip
-        
-        .html(d.Title + " - " + d.Artist + ", " + d.Genre + " (" + d.x + "," + d.y + ")")     
-    };
-    
-    
-
-    var mouseleave = function(d) {
-      //tooltip.transition().duration(2000).style("opacity", 0);
-    };
-
-
-    setTimeout(function(){
-      console.log(data_array.length)
-      const visiblePoints = data_array
-        .map(d => [(d.x)*30+100, (d.y)*(-30)+500]);
-
-      // Build Delaunay and Voronoi
-      const delaunay = d3.Delaunay.from(visiblePoints);
-      const voronoi = delaunay.voronoi([0, 0, width, height]);
-  
-
-      var points = d3.range(23059).map(function(d) {return [d.x,d.y];});
-      var polygons = voronoi.cellPolygons(points);
-
-      var color_array = []
-      for(var i=0; i<data_array.length; i++) {
-        color_array.push([data_array[i].r,data_array[i].g,data_array[i].b])
-        
-      }
-      const iterator = color_array.entries()
-
-      console.log(polygons)
-
-      var color = function(d) {
-        const thing = iterator.next().value[1]
-        //console.log(thing)
-        return [d3.rgb(thing[0]*255,thing[1]*255,thing[2]*255)];}
-      
-
-
-      
-      
-      const polygonData = polygons.map((polygon, i) => ({
-        path: polyToPath(polygon),
-        data: data_array[i]
-      }));
-
-      const thing = svg.append("g")
-        .selectAll("path")
-        .data(polygonData)
-        .enter()
-        .append("path")
-          .attr("d", d => d.path)
-          .attr("fill", color)
-          .attr("pointer-events", "all")
-          .on("mouseover", mouseover)
-          .on("mousemove", (event, d) => mousemove(event, d.data))
-          .on("mouseleave", mouseleave)
-          .on("click",(event,d) => {
-            showTooltipPolygon(d.data,d.path);
+        const cells = [];
+        for (let i=0; i<data.length; i++){
+          const poly = voronoi.cellPolygon(i);  
+          if (!poly) continue;
+          if (!polygonSpanOK(poly)) continue;
+          if (polygonArea(poly) > MAX_CELL_AREA) continue;
+          cells.push({
+            path: voronoi.renderCell(i),  
+            data: data[i]
           });
-          
-            
+        }
 
-      console.log(data_array)
-      
-      
-    }, 3000);
+        g.append("g")
+          .selectAll("path")
+          .data(cells)
+          .enter()
+          .append("path")
+            .attr("d", d => d.path)
+            .attr("fill", d => d3.rgb(
+              Math.round(+d.data.r * 255),
+              Math.round(+d.data.g * 255),
+              Math.round(+d.data.b * 255)
+            ))
+            .attr("pointer-events", "all")
+            .on("mouseover", onMouseOver)
+            .on("mousemove", onMouseMove)
+            .on("mouseleave", onMouseLeave)
+            .on("click", (event, d) => showTooltipPolygon(d.data, d.path));
 
+        g.append("path")
+          .attr("d", voronoi.render())
+          .attr("fill", "none")
+          .attr("stroke", "rgba(255,255,255,0.28)")
+          .attr("stroke-width", 0.5)
+          .attr("vector-effect", "non-scaling-stroke")
+          .attr("shape-rendering", "crispEdges")
+          .attr("pointer-events", "none");
+
+        hideLoading();
+      })
+      .catch(err => { console.error(err); hideLoading(); });
   }
+
+  
   document.getElementById("defaultOpen").click();
 </script>
 
